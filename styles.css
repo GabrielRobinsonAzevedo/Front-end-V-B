@@ -5,6 +5,10 @@
     font-family: Arial, Helvetica, sans-serif;
 }
 
+body {
+    background-color: white;
+}
+
 :root {
     --cor-primaria: #19be56;
     --cor-primaria-hover: #18a34b;
@@ -108,7 +112,7 @@ button a {
 
 .cartao {
     width: 300px;
-    height: 400px;
+    min-height: 400px;
     border-radius: 40px;
     box-shadow: var(--sombra-cartao);
     padding: 30px 0;
@@ -205,7 +209,7 @@ button a {
     display: flex;
     justify-content: space-between;
     padding: 20px 30px;
-    height: 200px;
+    min-height: 200px;
     box-shadow: var(--sombra-cartao);
     border-radius: 20px;
     margin-bottom: 50px;
@@ -429,4 +433,231 @@ button a {
 .grupoInput {
     display: flex;
     flex-direction: column;
+}
+
+/* =====================================================
+   Tagline dos cartões
+   ===================================================== */
+
+.taglineCartao {
+    text-align: center;
+    font-size: 0.85rem;
+    color: #555;
+    padding: 0 15px 5px;
+}
+
+/* =====================================================
+   Painel do Cliente — header com abas
+   ===================================================== */
+
+header.headerPainel {
+    height: auto;
+    min-height: 130px;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px 20px 10px;
+    gap: 8px;
+}
+
+.abasPainelCliente {
+    display: flex;
+    gap: 20px;
+    align-self: flex-start;
+}
+
+.abasPainelCliente button {
+    padding: 10px 25px;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all var(--duracao-rapida);
+}
+
+.abaAtiva {
+    background-color: var(--cor-primaria);
+    color: white;
+    border: 2px solid var(--cor-primaria);
+}
+
+.abaInativa {
+    background-color: white;
+    color: var(--cor-primaria);
+    border: 2px solid var(--cor-primaria);
+}
+
+.mainPainelCliente {
+    margin-top: 145px;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.textoVazio {
+    padding: 60px 20px;
+    text-align: center;
+    color: #666;
+}
+
+/* =====================================================
+   Chat — componente compartilhado
+   ===================================================== */
+
+.containerChat {
+    width: 800px;
+    max-width: 90vw;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 200px);
+}
+
+.mensagensChat {
+    flex: 1;
+    border: 1px solid #ddd;
+    border-radius: 15px;
+    padding: 20px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+    box-shadow: var(--sombra-cartao);
+}
+
+.barraInputChat {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pilulaChatInput {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    background-color: #f0f0f0;
+    padding: 10px 15px;
+    border-radius: 30px;
+    gap: 8px;
+}
+
+.pilulaChatInput input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+}
+
+.botaoAnexo {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #555;
+    display: flex;
+    align-items: center;
+    padding: 0;
+}
+
+.botaoEnviar {
+    width: 45px;
+    height: 45px;
+    flex-shrink: 0;
+    background-color: var(--cor-primaria);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color var(--duracao-rapida);
+}
+
+.botaoEnviar:hover {
+    background-color: var(--cor-primaria-hover);
+}
+
+.mensagemEnviada {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+}
+
+.mensagemRecebida {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 10px;
+}
+
+.balaoChatEnviado {
+    background-color: var(--cor-primaria);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 15px 15px 3px 15px;
+    max-width: 70%;
+    word-wrap: break-word;
+}
+
+.balaoChatRecebido {
+    background-color: #f0f0f0;
+    color: black;
+    padding: 10px 15px;
+    border-radius: 15px 15px 15px 3px;
+    max-width: 70%;
+    word-wrap: break-word;
+}
+
+/* =====================================================
+   Painel do Administrador
+   ===================================================== */
+
+.mainPainelAdmin {
+    display: flex;
+    margin-top: 90px;
+    height: calc(100vh - 90px);
+    border-top: 1px solid #ccc;
+}
+
+.colunaOperacoes,
+.colunaClientes {
+    width: 250px;
+    border-right: 1px solid #ccc;
+    flex-shrink: 0;
+    overflow-y: auto;
+}
+
+.colunaOperacoes h3,
+.colunaClientes h3 {
+    padding: 20px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    border-bottom: 1px solid #ccc;
+}
+
+.itemLista {
+    padding: 15px 20px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    transition: background-color var(--duracao-rapida);
+}
+
+.itemLista:hover:not(.itemAtivo) {
+    background-color: var(--cor-secundaria-hover);
+}
+
+.itemAtivo {
+    background-color: var(--cor-primaria);
+    color: white;
+}
+
+.colunaChat {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.colunaChat .containerChat {
+    width: 100%;
+    max-width: 100%;
+    flex: 1;
+    height: 100%;
 }

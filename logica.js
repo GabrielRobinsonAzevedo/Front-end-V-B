@@ -40,6 +40,7 @@ function construtorDeCartao(produto) {
     const estruturaHTML = `
         <div class="cartao" data-id="${produto.id}">
             <h2>${produto.titulo}</h2>
+            ${produto.tagline ? `<p class="taglineCartao">${produto.tagline}</p>` : ''}
             <ul>
                 ${descricaoArray.map(item => `<li>${item}</li>`).join('')}
             </ul>
@@ -476,7 +477,122 @@ async function enviarNovaSenhaAoBackend(dadosRedefinicao) {
 }
 
 /* ========================================================
-   5. CONTROLE
+   5. PAINEL DO CLIENTE
+   ======================================================== */
+
+function configurarChat(inputId, btnEnviarId, mensagensId) {
+    const input = document.getElementById(inputId);
+    const btnEnviar = document.getElementById(btnEnviarId);
+    const mensagens = document.getElementById(mensagensId);
+
+    if (!input || !btnEnviar || !mensagens) return;
+
+    const enviar = () => {
+        const texto = input.value.trim();
+        if (!texto) return;
+
+        const div = document.createElement('div');
+        div.className = 'mensagemEnviada';
+        div.innerHTML = `<div class="balaoChatEnviado">${texto}</div>`;
+        mensagens.appendChild(div);
+        mensagens.scrollTop = mensagens.scrollHeight;
+        input.value = '';
+    };
+
+    btnEnviar.onclick = enviar;
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') enviar();
+    });
+}
+
+function configurarPainelCliente() {
+    const btnChat = document.getElementById('btnChat');
+    const btnHistorico = document.getElementById('btnHistorico');
+    if (!btnChat) return;
+
+    const secaoChat = document.getElementById('secaoChat');
+    const secaoHistorico = document.getElementById('secaoHistorico');
+
+    btnChat.className = 'abaAtiva';
+    btnHistorico.className = 'abaInativa';
+
+    btnChat.onclick = () => {
+        btnChat.className = 'abaAtiva';
+        btnHistorico.className = 'abaInativa';
+        secaoChat.style.display = '';
+        secaoHistorico.style.display = 'none';
+    };
+
+    btnHistorico.onclick = () => {
+        btnHistorico.className = 'abaAtiva';
+        btnChat.className = 'abaInativa';
+        secaoHistorico.style.display = '';
+        secaoChat.style.display = 'none';
+    };
+
+    configurarChat('inputPainel', 'enviarPainel', 'mensagensPainel');
+}
+
+/* ========================================================
+   6. PAINEL DO ADMINISTRADOR
+   ======================================================== */
+
+function configurarPainelAdmin() {
+    const operacoes = document.querySelectorAll('.itemOperacao');
+    if (!operacoes.length) return;
+
+    const clientes = document.querySelectorAll('.itemCliente');
+    const areaDireita = document.getElementById('areaDireita');
+
+    const chatTemplate = () => `
+        <div class="containerChat">
+            <div class="mensagensChat" id="mensagensAdmin"></div>
+            <div class="barraInputChat">
+                <div class="pilulaChatInput">
+                    <input type="text" placeholder="Digite uma mensagem" id="inputAdmin">
+                    <button class="botaoAnexo">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                            <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.47"/>
+                        </svg>
+                    </button>
+                </div>
+                <button class="botaoEnviar" id="enviarAdmin">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>`;
+
+    operacoes.forEach(op => {
+        op.onclick = () => {
+            operacoes.forEach(o => o.classList.remove('itemAtivo'));
+            op.classList.add('itemAtivo');
+
+            if (op.dataset.op === 'atendimento') {
+                areaDireita.innerHTML = chatTemplate();
+                configurarChat('inputAdmin', 'enviarAdmin', 'mensagensAdmin');
+            } else {
+                const labels = { crud: 'CRUD de Produtos', historico: 'Histórico de Vendas' };
+                areaDireita.innerHTML = `<p style="padding:40px;color:#666;font-size:1.1rem;">Módulo "${labels[op.dataset.op]}" em desenvolvimento.</p>`;
+            }
+        };
+    });
+
+    clientes.forEach(cl => {
+        cl.onclick = () => {
+            clientes.forEach(c => c.classList.remove('itemAtivo'));
+            cl.classList.add('itemAtivo');
+            const mensagens = document.getElementById('mensagensAdmin');
+            if (mensagens) mensagens.innerHTML = '';
+        };
+    });
+
+    configurarChat('inputAdmin', 'enviarAdmin', 'mensagensAdmin');
+}
+
+/* ========================================================
+   7. CONTROLE
    ======================================================== */
 
 function atualizarBotaoCabecalho() {
@@ -517,4 +633,14 @@ if (document.getElementById("listaCompras")) {
 // Tela de Login
 if (document.getElementById("gerenciamentoDeConta")) {
     configurarFormularioLogin();
+}
+
+// Painel do Cliente
+if (document.getElementById("btnChat")) {
+    configurarPainelCliente();
+}
+
+// Painel do Administrador
+if (document.querySelector(".itemOperacao")) {
+    configurarPainelAdmin();
 }

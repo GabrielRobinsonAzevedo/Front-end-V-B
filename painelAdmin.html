@@ -2,48 +2,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conecta Mídia - Painel do Cliente</title>
+    <title>Conecta Mídia - Painel do Administrador</title>
     <link rel="stylesheet" href="styles.css">
     <script src="logica.js" defer></script>
 </head>
 <body>
-    <header class="headerPainel">
-        <h1>Painel do Cliente</h1>
+    <header>
+        <h1>Painel do administrador</h1>
         <div class="botoesCabecalho">
-            <button class="carrinhoCompras">
-                <a href="shoppingCart.html"><img src="assets/cart-shopping-svgrepo-com.svg" alt="Carrinho de compras" width="50"></a>
-            </button>
             <button class="entrar"><a href="minhaConta.html">Minha Conta</a></button>
-        </div>
-        <div class="abasPainelCliente">
-            <button id="btnChat">Support/chat</button>
-            <button id="btnHistorico">Histórico</button>
         </div>
     </header>
 
-    <main class="mainPainelCliente">
-        <div id="secaoChat">
+    <main class="mainPainelAdmin">
+        <div class="colunaOperacoes">
+            <h3>Operações disponíveis</h3>
+            <div class="itemLista itemOperacao" data-op="crud">CRUD de Produtos</div>
+            <div class="itemLista itemOperacao" data-op="historico">Histórico Vendas</div>
+            <div class="itemLista itemOperacao itemAtivo" data-op="atendimento">Central de Atendimento</div>
+        </div>
+
+        <div class="colunaClientes" id="colunaClientes">
+            <h3>Clientes ativos</h3>
+            <div class="itemLista itemCliente itemAtivo" data-cliente="mecanica-mauro">Mecânica mauro</div>
+            <div class="itemLista itemCliente" data-cliente="entregas-rapidas">Entregas rápidas</div>
+        </div>
+
+        <div class="colunaChat" id="areaDireita">
             <div class="containerChat">
-                <div class="mensagensChat" id="mensagensPainel"></div>
+                <div class="mensagensChat" id="mensagensAdmin"></div>
                 <div class="barraInputChat">
                     <div class="pilulaChatInput">
-                        <input type="text" placeholder="Digite uma mensagem" id="inputPainel">
+                        <input type="text" placeholder="Digite uma mensagem" id="inputAdmin">
                         <button class="botaoAnexo" title="Anexar arquivo">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
                                 <path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.47"/>
                             </svg>
                         </button>
                     </div>
-                    <button class="botaoEnviar" id="enviarPainel" title="Enviar mensagem">
+                    <button class="botaoEnviar" id="enviarAdmin" title="Enviar mensagem">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
                             <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
                         </svg>
                     </button>
                 </div>
             </div>
-        </div>
-        <div id="secaoHistorico" style="display:none">
-            <p class="textoVazio">Nenhum pedido encontrado.</p>
         </div>
     </main>
 </body>
