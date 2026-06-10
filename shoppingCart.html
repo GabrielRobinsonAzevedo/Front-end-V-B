@@ -1,0 +1,41 @@
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrinho de Compras</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="logica.js" defer></script>
+
+</head>
+<body>
+    <header>
+        <h1><a href="index.html">Conecta Mídia - Carrinho de Compras</a></h1>
+        <div class="botoesCabecalho">
+            <button class="carrinhoCompras"><img src="assets/cart-shopping-svgrepo-com.svg" alt="Carrinho de compras" width="50"></button>
+            <button class="entrar"><a href="login.html">Entrar</a></button>
+        </div>
+    </header>
+
+    <main id="conteudo">
+        <section id="listaCompras"></section>
+        
+        <section id="valorTotal">
+            <h3 id="valorMensal">R$ 1499,00/mês</h3>
+            <h3 id="valorAvulso">R$ 49,90</h3>
+            
+            <div id="identificacaoUsuario" style="display: none; margin-bottom: 15px; text-align: left;">
+                <label for="emailCheckout" style="display:block; font-size: 14px; font-weight: bold; margin-bottom: 5px;">Seu E-mail para a entrega:</label>
+                <input type="email" id="emailCheckout" placeholder="exemplo@email.com" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+            </div>
+
+            <button id="pagamento">Continuar para o pagamento</button>
+        </section>    
+    </main>
+
+    <section id="pagamentoAnimacao">
+        <h3>pagamento sendo realizado.</h3>
+        <div class="barraProgresso"><div class="progresso"></div></div>
+        <button class="fecharPagamaneto" disabled>fechar</button>
+    </section>
+</body>
+</html>

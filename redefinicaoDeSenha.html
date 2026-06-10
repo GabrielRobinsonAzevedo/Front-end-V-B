@@ -1,0 +1,39 @@
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conecta Mídia - Definição de Senha</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="logica.js" defer></script>
+</head>
+<body>
+    <header>
+        <h1><a href="index.html">Conecta Mídia - definição de senha</a></h1>
+        <div class="botoesCabecalho">
+            <button class="carrinhoCompras"><a href="shoppingCart.html"><img src="assets/cart-shopping-svgrepo-com.svg" alt="Carrinho de compras" width="50"></a></button>
+            <button class="entrar"><a href="login.html">Entrar</a></button>
+        </div>
+    </header>
+
+    <main class="containerAutenticacao">
+        <div class="cardFormulario">
+            <h2>Definir Nova Senha</h2> 
+            <hr class="linhaDivisoria">
+
+            <form id="redefinicaoDeSenha">
+                <div class="grupoInput">
+                    <label for="senha">Nova senha:</label>
+                    <input type="password" name="password" id="senha" required>
+                </div>
+                
+                <div class="grupoInput">
+                    <label for="senhaConfirmacao">Confirme a senha:</label>
+                    <input type="password" name="password" id="senhaConfirmacao" required>
+                </div>
+                
+                <button type="submit" id="confirmarNovaSenha" class="botaoSucesso">Confirmar senha</button>
+            </form>
+        </div>
+    </main>
+</body>
+</html>

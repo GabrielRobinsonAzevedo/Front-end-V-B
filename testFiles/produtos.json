@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "titulo": "Básico",
+    "categoria": "Mensal",
+    "preco": 299.00,
+    "descricao": "Gerenciamento de 1 conta, 6 posts por mês, 6 artes/banners inclusos, Suporte via painel, Edição de vídeos não inclusa",
+    "status_ativo": true
+  },
+  {
+    "id": 2,
+    "titulo": "Pro (Mais Vendido)",
+    "categoria": "Mensal",
+    "preco": 799.00,
+    "descricao": "Gerenciamento de até 3 contas, 20 posts por mês, 16 artes/banners inclusos, 4 edições de vídeos curtos, Suporte prioritário via painel",
+    "status_ativo": true
+  },
+  {
+    "id": 3,
+    "titulo": "Premium",
+    "categoria": "Mensal",
+    "preco": 1499.00,
+    "descricao": "Gerenciamento de até 5 contas, 30 posts por mês (Presença diária), 20 artes/banners inclusos, 10 edições de vídeos curtos, Suporte VIP com gerente de contas",
+    "status_ativo": true
+  },
+  {
+    "id": 4,
+    "titulo": "Pacote de Banners",
+    "categoria": "Avulso",
+    "preco": 49.90,
+    "descricao": "Entrega em até 3 dias úteis, PNG e JPEG de alta qualidade, Até 2 revisões inclusas",
+    "status_ativo": true
+  },
+  {
+    "id": 5,
+    "titulo": "Edição de Vídeo de Até 1 minuto",
+    "categoria": "Avulso",
+    "preco": 89.90,
+    "descricao": "Entrega em até 4 dias úteis, Formato: MP4 (Vertical 9:16), Incluso busca de músicas em alta",
+    "status_ativo": true
+  },
+  {
+    "id": 6,
+    "titulo": "Criação de logotipo Profissional",
+    "categoria": "Avulso",
+    "preco": 350.00,
+    "descricao": "Envio dos arquivos editáveis (Vetor/AI/PDF), Manual básico de aplicação da marca, Prazo: 10 dias úteis",
+    "status_ativo": true
+  }
+]
