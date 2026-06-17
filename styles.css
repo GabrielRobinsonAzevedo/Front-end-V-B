@@ -661,3 +661,373 @@ header.headerPainel {
     flex: 1;
     height: 100%;
 }
+
+/* =====================================================
+   Checkout — campos de pagamento
+   ===================================================== */
+
+#dadosCheckout {
+    margin-bottom: 15px;
+}
+
+.grupoInputCheckout {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+
+.grupoInputCheckout label {
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-bottom: 4px;
+    color: #444;
+}
+
+.grupoInputCheckout input,
+.grupoInputCheckout select,
+.grupoInputCheckout textarea {
+    padding: 8px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color var(--duracao-rapida);
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.grupoInputCheckout input:focus,
+.grupoInputCheckout select:focus,
+.grupoInputCheckout textarea:focus {
+    border-color: var(--cor-primaria);
+}
+
+.grupoInputDuplo {
+    display: flex;
+    gap: 10px;
+}
+
+.grupoInputDuplo .grupoInputCheckout {
+    flex: 1;
+}
+
+.separadorCheckout {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 12px 0 8px;
+}
+
+/* =====================================================
+   Dropdown "Minha Conta"
+   ===================================================== */
+
+.entrar.comDropdown {
+    position: relative;
+    cursor: pointer;
+}
+
+.dropdownConta {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    min-width: 220px;
+    padding: 12px 0 8px;
+    z-index: 2000;
+    text-align: left;
+}
+
+.dropdownConta.visivel {
+    display: block;
+}
+
+.dropNome {
+    padding: 4px 16px;
+    font-weight: bold;
+    font-size: 0.95rem;
+    color: #222;
+}
+
+.dropEmail {
+    padding: 2px 16px 10px;
+    font-size: 0.8rem;
+    color: #666;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 8px;
+}
+
+.dropSecao {
+    display: block;
+    padding: 4px 16px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.dropServico {
+    padding: 5px 16px;
+    font-size: 0.85rem;
+    color: #333;
+}
+
+.dropSemServico {
+    padding: 5px 16px;
+    font-size: 0.85rem;
+    color: #aaa;
+    font-style: italic;
+}
+
+.botaoLogout {
+    display: block;
+    width: calc(100% - 32px);
+    margin: 10px 16px 0;
+    padding: 8px 0;
+    background-color: #fee2e2;
+    color: #dc2626;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color var(--duracao-rapida);
+}
+
+.botaoLogout:hover {
+    background-color: #fecaca;
+}
+
+/* =====================================================
+   Histórico de compras (painel cliente)
+   ===================================================== */
+
+#secaoHistorico {
+    width: 800px;
+    max-width: 90vw;
+}
+
+.cartaoPedido {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--sombra-cartao);
+}
+
+.pedidoHeader {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 10px;
+}
+
+.pedidoId {
+    font-weight: bold;
+    font-size: 0.95rem;
+    color: #222;
+}
+
+.pedidoData {
+    font-size: 0.85rem;
+    color: #666;
+    margin-left: auto;
+}
+
+.pedidoStatus {
+    background-color: #d1fae5;
+    color: #065f46;
+    font-size: 0.75rem;
+    font-weight: bold;
+    padding: 3px 10px;
+    border-radius: 20px;
+}
+
+.pedidoItens {
+    list-style: none;
+    padding: 0;
+    font-size: 0.9rem;
+    color: #444;
+}
+
+.pedidoItens li {
+    padding: 3px 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.pedidoItens li:last-child {
+    border-bottom: none;
+}
+
+/* =====================================================
+   Admin CRUD de Produtos
+   ===================================================== */
+
+.crudContainer {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.crudCabecalho {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.crudCabecalho h3 {
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.btnAdicionarProduto {
+    padding: 8px 16px;
+    background-color: var(--cor-primaria);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color var(--duracao-rapida);
+}
+
+.btnAdicionarProduto:hover {
+    background-color: var(--cor-primaria-hover);
+}
+
+.tabelaCrud {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.tabelaCrud th {
+    background-color: #f9fafb;
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: bold;
+    color: #555;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.tabelaCrud td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #f3f4f6;
+    vertical-align: middle;
+}
+
+.tabelaCrud .trInativo td {
+    color: #aaa;
+}
+
+.badgeAtivo {
+    display: inline-block;
+    background-color: #d1fae5;
+    color: #065f46;
+    font-size: 0.75rem;
+    font-weight: bold;
+    padding: 3px 10px;
+    border-radius: 20px;
+}
+
+.badgeInativo {
+    display: inline-block;
+    background-color: #f3f4f6;
+    color: #9ca3af;
+    font-size: 0.75rem;
+    font-weight: bold;
+    padding: 3px 10px;
+    border-radius: 20px;
+}
+
+.btnAcaoCrud {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    cursor: pointer;
+    margin-right: 4px;
+    transition: opacity var(--duracao-rapida);
+}
+
+.btnAcaoCrud:hover {
+    opacity: 0.8;
+}
+
+.btnEditar {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+}
+
+.btnToggle {
+    background-color: #fef9c3;
+    color: #854d0e;
+}
+
+.formularioCrud {
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 16px;
+    max-width: 500px;
+}
+
+.formularioCrud h4 {
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 14px;
+}
+
+.formularioCrud textarea {
+    resize: vertical;
+    min-height: 70px;
+}
+
+.botoesFormulario {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.btnSalvarProduto {
+    padding: 8px 20px;
+    background-color: var(--cor-primaria);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color var(--duracao-rapida);
+}
+
+.btnSalvarProduto:hover {
+    background-color: var(--cor-primaria-hover);
+}
+
+.btnCancelarForm {
+    padding: 8px 20px;
+    background-color: #e5e7eb;
+    color: #444;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color var(--duracao-rapida);
+}
+
+.btnCancelarForm:hover {
+    background-color: #d1d5db;
+}

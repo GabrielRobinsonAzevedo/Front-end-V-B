@@ -24,9 +24,37 @@
             <h3 id="valorMensal">R$ 1499,00/mês</h3>
             <h3 id="valorAvulso">R$ 49,90</h3>
             
-            <div id="identificacaoUsuario" style="display: none; margin-bottom: 15px; text-align: left;">
-                <label for="emailCheckout" style="display:block; font-size: 14px; font-weight: bold; margin-bottom: 5px;">Seu E-mail para a entrega:</label>
-                <input type="email" id="emailCheckout" placeholder="exemplo@email.com" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box;">
+            <div id="dadosCheckout" style="display:none">
+                <div id="campoEmail" class="grupoInputCheckout" style="display:none">
+                    <label for="emailCheckout">E-mail</label>
+                    <input type="email" id="emailCheckout" placeholder="seu@email.com">
+                </div>
+
+                <div class="grupoInputCheckout">
+                    <label for="cpfCnpj">CPF / CNPJ</label>
+                    <input type="text" id="cpfCnpj" placeholder="000.000.000-00">
+                </div>
+
+                <span class="separadorCheckout">Dados do cartão (simulação)</span>
+
+                <div class="grupoInputCheckout">
+                    <label for="nomeTitular">Nome no cartão</label>
+                    <input type="text" id="nomeTitular" placeholder="NOME SOBRENOME">
+                </div>
+                <div class="grupoInputCheckout">
+                    <label for="numeroCartao">Número do cartão</label>
+                    <input type="text" id="numeroCartao" placeholder="0000 0000 0000 0000" maxlength="19">
+                </div>
+                <div class="grupoInputDuplo">
+                    <div class="grupoInputCheckout">
+                        <label for="validadeCartao">Validade</label>
+                        <input type="text" id="validadeCartao" placeholder="MM/AA" maxlength="5">
+                    </div>
+                    <div class="grupoInputCheckout">
+                        <label for="cvvCartao">CVV</label>
+                        <input type="text" id="cvvCartao" placeholder="000" maxlength="3">
+                    </div>
+                </div>
             </div>
 
             <button id="pagamento">Continuar para o pagamento</button>
