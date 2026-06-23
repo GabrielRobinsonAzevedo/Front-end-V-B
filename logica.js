@@ -1,5 +1,7 @@
 let itensCarrinho = JSON.parse(localStorage.getItem('carrinhoConectaMidia')) || [];
 
+const API_BASE = '/api';
+
 /* ========================================================
    1. INDEX
    ======================================================== */
@@ -8,14 +10,8 @@ let itensCarrinho = JSON.parse(localStorage.getItem('carrinhoConectaMidia')) || 
 // carrega produtos da vitrine
 async function carregarProdutos() {
     try {
-        let dados;
-        const produtosSalvos = localStorage.getItem('produtosAdmin');
-        if (produtosSalvos) {
-            dados = JSON.parse(produtosSalvos);
-        } else {
-            const resposta = await fetch('testFiles/produtos.json');
-            dados = await resposta.json();
-        }
+        const resposta = await fetch(API_BASE + '/produtos');
+        const dados = await resposta.json();
 
         for (const produto of dados) {
             if (!produto.status_ativo) continue;
@@ -49,7 +45,7 @@ function construtorDeCartao(produto) {
             <ul>
                 ${descricaoArray.map(item => `<li>${item}</li>`).join('')}
             </ul>
-            <h3>R$ ${produto.preco.toFixed(2).replace('.', ',')}${sufixoPreco}</h3>
+            <h3>R$ ${parseFloat(produto.preco).toFixed(2).replace('.', ',')}${sufixoPreco}</h3>
             <div class="botoesCartao">
                 <button class="carrinhoCompras"><img src="assets/cart-shopping-svgrepo-com.svg" alt="Carrinho de compras" width="50"></button>
                 <button class="comprar">${produto.categoria === 'Mensal' ? 'Assinar plano' : 'Comprar'}</button>
@@ -168,7 +164,7 @@ function renderizarCarrinho(carrinho) {
                     </div>
 
                     <div class="ValorRemocao">
-                        <p class="valor">R$ ${item.preco.toFixed(2).replace('.', ',')}${sufixoPreco}</p>
+                        <p class="valor">R$ ${parseFloat(item.preco).toFixed(2).replace('.', ',')}${sufixoPreco}</p>
                         <button class="removerCompra">remover</button>
                     </div>
                 </div>
@@ -248,19 +244,16 @@ function configurarCliquesCarrinho() {
     });
 }
 
-// API falsa do Carrinho
+// API do Carrinho
 async function enviarDadosParaOBackend(dadosCarrinho) {
-    console.log("Preparando dados para envio ao Back-end...", dadosCarrinho);
-
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve({ 
-                sucesso: true, 
-                mensagem: "Pedido registrado no servidor!", 
-                pedidoId: Math.floor(Math.random() * 90000) + 10000 
-            });
-        }, 1000);
+    const resposta = await fetch(API_BASE + '/pedidos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dadosCarrinho)
     });
+    const dados = await resposta.json();
+    if (!resposta.ok) throw new Error(dados.mensagem || 'Erro ao processar pedido');
+    return dados;
 }
 
 // finge um pagamento
@@ -318,7 +311,7 @@ async function dispararPagamento() {
             dataPedido: new Date().toISOString(),
             comprador: {
                 email: emailComprador,
-                cpfCnpj: cpfCnpjInput.value.trim(),
+                cpf_cnpj: cpfCnpjInput.value.trim(),
                 statusConta: usuarioLogado ? "Logado" : "Nova Conta (Pendente)"
             },
             itens: itensCarrinho.map(item => ({
@@ -420,7 +413,11 @@ function configurarFormularioLogin() {
             if (respostaServidor.sucesso) {
                 localStorage.setItem("usuarioLogado", JSON.stringify(respostaServidor.usuario));
                 alert(`Bem-vindo de volta, ${respostaServidor.usuario.nome}!`);
-                window.location.href = "index.html";
+                if (respostaServidor.usuario.tipo === 'admin') {
+                    window.location.href = "painelAdmin.html";
+                } else {
+                    window.location.href = "index.html";
+                }
             } else {
                 alert(respostaServidor.mensagem);
                 if (botaoEntrar) {
@@ -440,25 +437,14 @@ function configurarFormularioLogin() {
     };
 }
 
-// API falsa de Autenticação
+// API de Autenticação
 async function autenticarUsuarioNoBackend(credenciais) {
-    console.log("Enviando dados de login para o servidor...", credenciais);
-
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            if (credenciais.email === "teste@conecta.com" && credenciais.senha === "123456") {
-                resolve({
-                    sucesso: true,
-                    usuario: { nome: "Alex Silva", email: credenciais.email }
-                });
-            } else {
-                resolve({
-                    sucesso: false,
-                    mensagem: "E-mail ou senha incorretos. (Use teste@conecta.com e 123456)"
-                });
-            }
-        }, 1200);
+    const resposta = await fetch(API_BASE + '/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: credenciais.email, senha: credenciais.senha })
     });
+    return await resposta.json();
 }
 
 /* ========================================================
@@ -518,31 +504,72 @@ function configurarFormularioRedefinicao() {
     };
 }
 
-// Mock API de Redefinição de Senha
+// API de Redefinição de Senha
 async function enviarNovaSenhaAoBackend(dadosRedefinicao) {
-    console.log("Enviando nova senha para o servidor...", dadosRedefinicao);
-
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve({ sucesso: true, message: "Senha redefinida com sucesso!" });
-        }, 1200);
+    const resposta = await fetch(API_BASE + '/auth/redefinir-senha', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: dadosRedefinicao.email, novaSenha: dadosRedefinicao.novaSenha })
     });
+    return await resposta.json();
 }
 
 /* ========================================================
    5. PAINEL DO CLIENTE
    ======================================================== */
 
-function configurarChat(inputId, btnEnviarId, mensagensId) {
+async function carregarMensagens(container, apiConfig) {
+    try {
+        const params = new URLSearchParams();
+        if (apiConfig.pedidoId) params.append('id_pedido', apiConfig.pedidoId);
+        else if (apiConfig.email) params.append('cliente_email', apiConfig.email);
+
+        const r = await fetch(API_BASE + '/mensagens?' + params.toString());
+        const msgs = await r.json();
+
+        container.innerHTML = '';
+        msgs.forEach(msg => {
+            const isOwnMessage = msg.remetente_tipo === apiConfig.perspectiva;
+            const div = document.createElement('div');
+            div.className = isOwnMessage ? 'mensagemEnviada' : 'mensagemRecebida';
+            div.innerHTML = `<div class="${isOwnMessage ? 'balaoChatEnviado' : 'balaoChatRecebido'}">${msg.texto}</div>`;
+            container.appendChild(div);
+        });
+        container.scrollTop = container.scrollHeight;
+    } catch (e) {
+        console.error('Erro ao carregar mensagens:', e);
+    }
+}
+
+function configurarChat(inputId, btnEnviarId, mensagensId, apiConfig = null) {
     const input = document.getElementById(inputId);
     const btnEnviar = document.getElementById(btnEnviarId);
     const mensagens = document.getElementById(mensagensId);
 
     if (!input || !btnEnviar || !mensagens) return;
 
-    const enviar = () => {
+    if (apiConfig) carregarMensagens(mensagens, apiConfig);
+
+    const enviar = async () => {
         const texto = input.value.trim();
         if (!texto) return;
+
+        if (apiConfig) {
+            try {
+                await fetch(API_BASE + '/mensagens', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        texto,
+                        remetente_tipo: apiConfig.perspectiva,
+                        cliente_email: apiConfig.email || undefined,
+                        id_pedido: apiConfig.pedidoId || undefined
+                    })
+                });
+            } catch (e) {
+                console.error('Erro ao enviar mensagem:', e);
+            }
+        }
 
         const div = document.createElement('div');
         div.className = 'mensagemEnviada';
@@ -584,19 +611,50 @@ function configurarPainelCliente() {
         renderizarHistoricoCliente();
     };
 
-    configurarChat('inputPainel', 'enviarPainel', 'mensagensPainel');
+    const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
+    const apiConfig = usuarioLogado
+        ? { email: usuarioLogado.email, perspectiva: 'cliente' }
+        : null;
+    configurarChat('inputPainel', 'enviarPainel', 'mensagensPainel', apiConfig);
 }
 
 /* ========================================================
    6. PAINEL DO ADMINISTRADOR
    ======================================================== */
 
-function configurarPainelAdmin() {
+async function configurarPainelAdmin() {
     const operacoes = document.querySelectorAll('.itemOperacao');
     if (!operacoes.length) return;
 
-    const clientes = document.querySelectorAll('.itemCliente');
+    const colunaClientes = document.getElementById('colunaClientes');
     const areaDireita = document.getElementById('areaDireita');
+    let clienteAtualEmail = null;
+
+    // Carrega lista de clientes do backend
+    try {
+        const r = await fetch(API_BASE + '/clientes');
+        const clientes = await r.json();
+
+        const header = colunaClientes.querySelector('h3');
+        colunaClientes.innerHTML = '';
+        if (header) colunaClientes.appendChild(header);
+
+        if (clientes.length === 0) {
+            colunaClientes.insertAdjacentHTML('beforeend', '<p style="padding:15px;color:#666;font-size:0.85rem;">Nenhum cliente ativo.</p>');
+        } else {
+            clientes.forEach((cl, idx) => {
+                const div = document.createElement('div');
+                div.className = 'itemLista itemCliente' + (idx === 0 ? ' itemAtivo' : '');
+                div.dataset.email = cl.email;
+                div.textContent = cl.email.split('@')[0];
+                div.title = cl.email;
+                colunaClientes.appendChild(div);
+            });
+            clienteAtualEmail = clientes[0]?.email || null;
+        }
+    } catch (err) {
+        console.error('Erro ao carregar clientes:', err);
+    }
 
     const chatTemplate = () => `
         <div class="containerChat">
@@ -618,14 +676,22 @@ function configurarPainelAdmin() {
             </div>
         </div>`;
 
+    const abrirChatCliente = (email) => {
+        areaDireita.innerHTML = chatTemplate();
+        configurarChat('inputAdmin', 'enviarAdmin', 'mensagensAdmin', { email, perspectiva: 'admin' });
+    };
+
     operacoes.forEach(op => {
         op.onclick = () => {
             operacoes.forEach(o => o.classList.remove('itemAtivo'));
             op.classList.add('itemAtivo');
 
             if (op.dataset.op === 'atendimento') {
-                areaDireita.innerHTML = chatTemplate();
-                configurarChat('inputAdmin', 'enviarAdmin', 'mensagensAdmin');
+                if (clienteAtualEmail) {
+                    abrirChatCliente(clienteAtualEmail);
+                } else {
+                    areaDireita.innerHTML = '<p style="padding:40px;color:#666;">Nenhum cliente com pedidos ainda.</p>';
+                }
             } else if (op.dataset.op === 'crud') {
                 renderizarCrudProdutos(areaDireita);
             } else if (op.dataset.op === 'historico') {
@@ -634,62 +700,87 @@ function configurarPainelAdmin() {
         };
     });
 
-    clientes.forEach(cl => {
-        cl.onclick = () => {
-            clientes.forEach(c => c.classList.remove('itemAtivo'));
-            cl.classList.add('itemAtivo');
-            const mensagens = document.getElementById('mensagensAdmin');
-            if (mensagens) mensagens.innerHTML = '';
-        };
+    colunaClientes.addEventListener('click', (e) => {
+        const item = e.target.closest('.itemCliente');
+        if (!item) return;
+
+        colunaClientes.querySelectorAll('.itemCliente').forEach(c => c.classList.remove('itemAtivo'));
+        item.classList.add('itemAtivo');
+        clienteAtualEmail = item.dataset.email;
+
+        const opAtendimento = document.querySelector('[data-op="atendimento"]');
+        if (opAtendimento && !opAtendimento.classList.contains('itemAtivo')) {
+            operacoes.forEach(o => o.classList.remove('itemAtivo'));
+            opAtendimento.classList.add('itemAtivo');
+        }
+        abrirChatCliente(clienteAtualEmail);
     });
 
-    configurarChat('inputAdmin', 'enviarAdmin', 'mensagensAdmin');
+    // Estado inicial: chat do primeiro cliente
+    if (clienteAtualEmail) {
+        abrirChatCliente(clienteAtualEmail);
+    }
 }
 
 /* ========================================================
    HELPERS DOS PAINÉIS
    ======================================================== */
 
-function renderizarHistoricoCliente() {
+async function renderizarHistoricoCliente() {
     const secaoHistorico = document.getElementById('secaoHistorico');
     if (!secaoHistorico) return;
 
-    const historico = JSON.parse(localStorage.getItem('historicoCompras')) || [];
-
-    if (historico.length === 0) {
-        secaoHistorico.innerHTML = '<p class="textoVazio">Nenhum pedido encontrado.</p>';
+    const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
+    if (!usuarioLogado) {
+        secaoHistorico.innerHTML = '<p class="textoVazio">Faça login para ver seus pedidos.</p>';
         return;
     }
 
-    secaoHistorico.innerHTML = historico.map(pedido => {
-        const data = new Date(pedido.data).toLocaleDateString('pt-BR');
-        const itensHtml = pedido.itens.map(item => {
-            const sufixo = item.categoria === 'Mensal' ? '/mês' : '';
-            const qtd = item.categoria === 'Avulso' ? ` (x${item.quantidade})` : '';
-            return `<li>${item.titulo}${qtd} — R$ ${item.precoUnitario.toFixed(2).replace('.', ',')}${sufixo}</li>`;
-        }).join('');
+    secaoHistorico.innerHTML = '<p class="textoVazio">Carregando...</p>';
 
-        return `
-            <div class="cartaoPedido">
-                <div class="pedidoHeader">
-                    <span class="pedidoId">Pedido #${pedido.pedidoId}</span>
-                    <span class="pedidoData">${data}</span>
-                    <span class="pedidoStatus">Ativo</span>
-                </div>
-                <ul class="pedidoItens">${itensHtml}</ul>
-            </div>`;
-    }).join('');
+    try {
+        const r = await fetch(API_BASE + '/pedidos/historico?email=' + encodeURIComponent(usuarioLogado.email));
+        const historico = await r.json();
+
+        if (!historico.length) {
+            secaoHistorico.innerHTML = '<p class="textoVazio">Nenhum pedido encontrado.</p>';
+            return;
+        }
+
+        secaoHistorico.innerHTML = historico.map(pedido => {
+            const data = new Date(pedido.data_pedido).toLocaleDateString('pt-BR');
+            const itensHtml = (pedido.itens || []).map(item => {
+                const sufixo = item.categoria === 'Mensal' ? '/mês' : '';
+                const qtd = item.categoria === 'Avulso' ? ` (x${item.quantidade})` : '';
+                return `<li>${item.titulo}${qtd} — R$ ${parseFloat(item.preco_unitario).toFixed(2).replace('.', ',')}${sufixo}</li>`;
+            }).join('');
+
+            return `
+                <div class="cartaoPedido">
+                    <div class="pedidoHeader">
+                        <span class="pedidoId">Pedido #${pedido.id}</span>
+                        <span class="pedidoData">${data}</span>
+                        <span class="pedidoStatus">${pedido.status_servico}</span>
+                    </div>
+                    <ul class="pedidoItens">${itensHtml}</ul>
+                </div>`;
+        }).join('');
+    } catch (err) {
+        secaoHistorico.innerHTML = '<p class="textoVazio">Erro ao carregar histórico. Verifique se o servidor está rodando.</p>';
+        console.error(err);
+    }
 }
 
 async function renderizarCrudProdutos(areaDireita) {
+    areaDireita.innerHTML = '<div class="crudContainer"><p style="padding:20px;color:#666">Carregando produtos...</p></div>';
+
     let produtos;
-    const salvo = localStorage.getItem('produtosAdmin');
-    if (salvo) {
-        produtos = JSON.parse(salvo);
-    } else {
-        const r = await fetch('testFiles/produtos.json');
+    try {
+        const r = await fetch(API_BASE + '/admin/produtos');
         produtos = await r.json();
-        localStorage.setItem('produtosAdmin', JSON.stringify(produtos));
+    } catch (err) {
+        areaDireita.innerHTML = '<div class="crudContainer"><p style="padding:20px;color:red">Erro ao carregar produtos. Verifique se o servidor está rodando.</p></div>';
+        return;
     }
 
     const renderTabela = () => {
@@ -697,7 +788,7 @@ async function renderizarCrudProdutos(areaDireita) {
             <tr class="${!p.status_ativo ? 'trInativo' : ''}">
                 <td>${p.titulo}</td>
                 <td>${p.categoria}</td>
-                <td>R$ ${p.preco.toFixed(2).replace('.', ',')}</td>
+                <td>R$ ${parseFloat(p.preco).toFixed(2).replace('.', ',')}</td>
                 <td><span class="${p.status_ativo ? 'badgeAtivo' : 'badgeInativo'}">${p.status_ativo ? 'Ativo' : 'Inativo'}</span></td>
                 <td>
                     <button class="btnAcaoCrud btnEditar" data-id="${p.id}">Editar</button>
@@ -719,13 +810,22 @@ async function renderizarCrudProdutos(areaDireita) {
             </div>`;
 
         areaDireita.querySelectorAll('.btnToggle').forEach(btn => {
-            btn.onclick = () => {
+            btn.onclick = async () => {
                 const p = produtos.find(x => x.id == btn.dataset.id);
-                if (p) {
+                if (!p) return;
+                try {
+                    await fetch(API_BASE + '/admin/produtos/' + p.id, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            titulo: p.titulo, descricao: p.descricao || '',
+                            categoria: p.categoria, preco: parseFloat(p.preco),
+                            status_ativo: !p.status_ativo
+                        })
+                    });
                     p.status_ativo = !p.status_ativo;
-                    localStorage.setItem('produtosAdmin', JSON.stringify(produtos));
                     renderTabela();
-                }
+                } catch (e) { alert('Erro ao atualizar produto.'); }
             };
         });
 
@@ -739,20 +839,32 @@ async function renderizarCrudProdutos(areaDireita) {
                     <div class="formularioCrud">
                         <h4>Editar Produto</h4>
                         <div class="grupoInputCheckout"><label>Título</label><input id="editTitulo" value="${p.titulo}"></div>
-                        <div class="grupoInputCheckout"><label>Preço (R$)</label><input id="editPreco" type="number" value="${p.preco}" step="0.01"></div>
-                        <div class="grupoInputCheckout"><label>Tagline</label><input id="editTagline" value="${p.tagline || ''}"></div>
+                        <div class="grupoInputCheckout"><label>Preço (R$)</label><input id="editPreco" type="number" value="${parseFloat(p.preco)}" step="0.01"></div>
+                        <div class="grupoInputCheckout"><label>Descrição (itens separados por vírgula)</label><input id="editDescricao" value="${p.descricao || ''}"></div>
                         <div class="botoesFormulario">
                             <button class="btnSalvarProduto">Salvar</button>
                             <button class="btnCancelarForm">Cancelar</button>
                         </div>
                     </div>`;
-                form.querySelector('.btnSalvarProduto').onclick = () => {
-                    p.titulo = document.getElementById('editTitulo').value.trim();
-                    p.preco = parseFloat(document.getElementById('editPreco').value) || p.preco;
-                    p.tagline = document.getElementById('editTagline').value.trim();
-                    localStorage.setItem('produtosAdmin', JSON.stringify(produtos));
-                    form.style.display = 'none';
-                    renderTabela();
+                form.querySelector('.btnSalvarProduto').onclick = async () => {
+                    try {
+                        const body = {
+                            titulo: document.getElementById('editTitulo').value.trim(),
+                            descricao: document.getElementById('editDescricao').value.trim(),
+                            categoria: p.categoria,
+                            preco: parseFloat(document.getElementById('editPreco').value) || parseFloat(p.preco),
+                            status_ativo: p.status_ativo
+                        };
+                        const r = await fetch(API_BASE + '/admin/produtos/' + p.id, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(body)
+                        });
+                        const updated = await r.json();
+                        Object.assign(p, updated);
+                        form.style.display = 'none';
+                        renderTabela();
+                    } catch (e) { alert('Erro ao salvar produto.'); }
                 };
                 form.querySelector('.btnCancelarForm').onclick = () => { form.style.display = 'none'; };
             };
@@ -767,29 +879,33 @@ async function renderizarCrudProdutos(areaDireita) {
                     <div class="grupoInputCheckout"><label>Título</label><input id="newTitulo" placeholder="Nome do produto"></div>
                     <div class="grupoInputCheckout"><label>Categoria</label><select id="newCategoria"><option value="Mensal">Mensal</option><option value="Avulso">Avulso</option></select></div>
                     <div class="grupoInputCheckout"><label>Preço (R$)</label><input id="newPreco" type="number" placeholder="0.00" step="0.01"></div>
-                    <div class="grupoInputCheckout"><label>Tagline</label><input id="newTagline" placeholder="Descrição curta"></div>
-                    <div class="grupoInputCheckout"><label>Itens (separados por vírgula)</label><textarea id="newDescricao" placeholder="Item 1, Item 2"></textarea></div>
+                    <div class="grupoInputCheckout"><label>Descrição (itens separados por vírgula)</label><textarea id="newDescricao" placeholder="Item 1, Item 2"></textarea></div>
                     <div class="botoesFormulario">
                         <button class="btnSalvarProduto">Salvar</button>
                         <button class="btnCancelarForm">Cancelar</button>
                     </div>
                 </div>`;
-            form.querySelector('.btnSalvarProduto').onclick = () => {
+            form.querySelector('.btnSalvarProduto').onclick = async () => {
                 const titulo = document.getElementById('newTitulo').value.trim();
                 if (!titulo) { alert('Informe o título do produto.'); return; }
-                const novo = {
-                    id: Date.now(),
-                    titulo,
-                    categoria: document.getElementById('newCategoria').value,
-                    preco: parseFloat(document.getElementById('newPreco').value) || 0,
-                    tagline: document.getElementById('newTagline').value.trim(),
-                    descricao: document.getElementById('newDescricao').value.trim() || titulo,
-                    status_ativo: true
-                };
-                produtos.push(novo);
-                localStorage.setItem('produtosAdmin', JSON.stringify(produtos));
-                form.style.display = 'none';
-                renderTabela();
+                try {
+                    const body = {
+                        titulo,
+                        categoria: document.getElementById('newCategoria').value,
+                        preco: parseFloat(document.getElementById('newPreco').value) || 0,
+                        descricao: document.getElementById('newDescricao').value.trim(),
+                        status_ativo: true
+                    };
+                    const r = await fetch(API_BASE + '/admin/produtos', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                    const novo = await r.json();
+                    produtos.push(novo);
+                    form.style.display = 'none';
+                    renderTabela();
+                } catch (e) { alert('Erro ao criar produto.'); }
             };
             form.querySelector('.btnCancelarForm').onclick = () => { form.style.display = 'none'; };
         };
@@ -798,37 +914,46 @@ async function renderizarCrudProdutos(areaDireita) {
     renderTabela();
 }
 
-function renderizarHistoricoVendas(areaDireita) {
-    const historico = JSON.parse(localStorage.getItem('historicoVendas')) || [];
+async function renderizarHistoricoVendas(areaDireita) {
+    areaDireita.innerHTML = '<div class="crudContainer"><p style="padding:20px;color:#666">Carregando vendas...</p></div>';
 
-    if (historico.length === 0) {
-        areaDireita.innerHTML = '<div class="crudContainer"><h3>Histórico de Vendas</h3><p style="margin-top:20px;color:#666;">Nenhuma venda registrada.</p></div>';
-        return;
+    try {
+        const adminLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
+        const email = adminLogado?.email || 'admin@conecta.com';
+        const r = await fetch(API_BASE + '/pedidos/historico?email=' + encodeURIComponent(email));
+        const historico = await r.json();
+
+        if (!historico.length) {
+            areaDireita.innerHTML = '<div class="crudContainer"><h3>Histórico de Vendas</h3><p style="margin-top:20px;color:#666;">Nenhuma venda registrada.</p></div>';
+            return;
+        }
+
+        const linhas = historico.map(pedido => {
+            const data = new Date(pedido.data_pedido).toLocaleDateString('pt-BR');
+            const itens = (pedido.itens || []).map(i => i.titulo).join(', ');
+            return `
+                <tr>
+                    <td>#${pedido.id}</td>
+                    <td>${pedido.cliente_email}</td>
+                    <td>${itens}</td>
+                    <td>R$ ${parseFloat(pedido.valor_total).toFixed(2).replace('.', ',')}</td>
+                    <td>${data}</td>
+                    <td><span class="${pedido.status_pagamento === 'Pago' ? 'badgeAtivo' : 'badgeInativo'}">${pedido.status_pagamento}</span></td>
+                </tr>`;
+        }).join('');
+
+        areaDireita.innerHTML = `
+            <div class="crudContainer">
+                <h3 style="margin-bottom:20px">Histórico de Vendas</h3>
+                <table class="tabelaCrud">
+                    <thead><tr><th>Pedido</th><th>Cliente</th><th>Serviços</th><th>Total</th><th>Data</th><th>Status</th></tr></thead>
+                    <tbody>${linhas}</tbody>
+                </table>
+            </div>`;
+    } catch (err) {
+        areaDireita.innerHTML = '<div class="crudContainer"><p style="padding:20px;color:red">Erro ao carregar vendas. Verifique se o servidor está rodando.</p></div>';
+        console.error(err);
     }
-
-    const linhas = historico.map(pedido => {
-        const data = new Date(pedido.data).toLocaleDateString('pt-BR');
-        const total = pedido.itens.reduce((s, i) => s + (i.precoUnitario * i.quantidade), 0);
-        const itens = pedido.itens.map(i => i.titulo).join(', ');
-        return `
-            <tr>
-                <td>#${pedido.pedidoId}</td>
-                <td>${pedido.comprador.email}</td>
-                <td>${itens}</td>
-                <td>R$ ${total.toFixed(2).replace('.', ',')}</td>
-                <td>${data}</td>
-                <td><span class="badgeAtivo">Ativo</span></td>
-            </tr>`;
-    }).join('');
-
-    areaDireita.innerHTML = `
-        <div class="crudContainer">
-            <h3 style="margin-bottom:20px">Histórico de Vendas</h3>
-            <table class="tabelaCrud">
-                <thead><tr><th>Pedido</th><th>Cliente</th><th>Serviços</th><th>Total</th><th>Data</th><th>Status</th></tr></thead>
-                <tbody>${linhas}</tbody>
-            </table>
-        </div>`;
 }
 
 /* ========================================================

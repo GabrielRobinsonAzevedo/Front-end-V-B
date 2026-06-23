@@ -23,7 +23,7 @@ app.use('/api', authRoutes);
 app.use('/api', orderRoutes);
 app.use('/api', chatRoutes);
 
-app.use(express.static(path.join(__dirname, '../Front-end-V-B')));
+app.use(express.static(path.join(__dirname, '..')));
 
 app.listen(PORT, () => {
   console.log(`servidor iniciado em http://localhost:${PORT}`);
